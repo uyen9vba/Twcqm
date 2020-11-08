@@ -15,7 +15,7 @@ class Options:
 
         args = None if argv else config.get('paths', None)
 
-    def run_analyses(self, paths=None):
+    def check_paths(self, paths=None):
         if paths is None:
             paths = self.config.get('paths', None)
 

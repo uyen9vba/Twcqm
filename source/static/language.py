@@ -17,4 +17,4 @@ class Language(enum.Enum):
     WHITESPACE_OPERATORS = frozenset(['**=', '*=', '/=', '//=', '+=', '-=', '!=', '<>',
                                     '<', '>', '%=', '^=', '&=', '|=', '==', '<=', '>=',
                                     '<<=', '>>=', '=', 'and', 'in', 'is', 'or', '->', ':='])
-    
+    SKIP_TOKENS = NEWLINE.union([tokenize.INDENT, tokenize.DEDENT])

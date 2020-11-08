@@ -2,15 +2,14 @@
 import regex
 import language
 
-
-analyses = []
-
-
-def add_analysis(column, code=None):
-    analyses.append([column, code])
+import analyzer
 
 
-@add_analysis
+"""
+Logical analysis functions
+"""
+
+@analyzer.add_analysis
 def indent(line, indent):
     # E101
     # W191
