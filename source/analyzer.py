@@ -84,7 +84,6 @@ class Analyzer:
 
     def build_line(self, tokens):
         logical = []
-        comments = []
         previous_row = None
         previous_column = None
 
@@ -100,8 +99,21 @@ class Analyzer:
                 (row, column) = start
 
                 if previous_row != row:
-                    
+                   previous_text = self.lines[previous_row - 1][previous_column - 1]
 
+                   if previous text == ',' or (previous_text not in '{[(' and text not in '}])'):
+                       text = ' ' + text
+                elif previous_column != column:
+                    text = line[previous_column:column] + text
+
+            logical.append(text)
+            length += len(text)
+            mapping.append((length, end))
+            (previous_row, previous_column) = end
+
+        self.line = ''.join(logical)
+        
+        return mapping
             
 
     def generate_tokens(self):
