@@ -11,8 +11,10 @@ class Analyzer:
         self.indent_char = None
         self.line = None
         self.lines = lines
+        self.line_count = 0
         self.physical_analyses = []
         self.logical_analyses = []
+        self.report = report.Report()
 
     def add_physical_analysis(column, message=None):
         self.pysical_analyses.append([column, message])
@@ -50,8 +52,23 @@ class Analyzer:
                     return a.readlines()
 
     def run_physical_analyses(self, line):
-        for name, check, args in self.options.physical_checks:
-            #
+        for name, analysis, args in self.physical_analyses:
+            result = self.run_analysis(analysis, args)
+
+            if result is not None:
+                (column, message) = result
+
+                if message[:4] == 'E101':
+                    self.indent_char = line[0]
+
+
+    def run_analysis(self, analysis, args_names):
+        args = []
+
+        for a in args:
+            args.append(getattr(self, name))
+
+        return analysis(*arguments)
 
     def run_analyses(self, filename):
         tokens = []
@@ -77,10 +94,26 @@ class Analyzer:
             elif not nesting:
                 if type in language.Language.NEWLINE:
                     if type == tokenize.NEWLINE:
-                        self.run_logical_analysis(tokens)
+                        self.run_logical_analyses(tokens)
+                        self.blank_before = 0
+                    elif len(tokens) == 1:
+                        del self.tokens[0]
+                    else:
+                        self.run_logical_analyses(tokens)
+
+        if tokens:
+            self.run_physical_analyses(self.lines[-1])
+            self.run_logical_analyses(tokens)
+
+        return self.report.get_file_results()
+
 
     def run_logical_analyses(self, tokens):
-        #
+        self.line_count += 1
+        mapping = self.build_line(tokens)
+
+        if not mapping:
+            return None
 
     def build_line(self, tokens):
         logical = []
