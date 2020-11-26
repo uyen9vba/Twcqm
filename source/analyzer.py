@@ -3,10 +3,11 @@ import tokenize
 
 import static.language
 import report
+import options
 
 
 class Analyzer:
-    def __init__(self, lines, options=Style(kwargs).options, **kwargs):
+    def __init__(self, lines, options=options.Options(), **kwargs):
         self.options = options
         self.indent_char = None
         self.line = None
@@ -15,6 +16,7 @@ class Analyzer:
         self.physical_analyses = []
         self.logical_analyses = []
         self.report = report.Report()
+
 
     def add_physical_analysis(column, message=None):
         self.pysical_analyses.append([column, message])

@@ -2,18 +2,22 @@
 import os
 import fnmatch
 
+import report
+
 
 class Options:
-    def __init__(self, *args, **kwargs):
-        argv = kwargs.pop('argv', False)
-        config = kwargs.pop('config', False)
-        parser = kwargs.pop('parser', None)
-        verbose = kwargs.pop('verbose', None)
+    def __init__(self, report=report.Report(), *args, **kwargs):
+        self.argv = kwargs.pop('argv', False)
+        self.config = kwargs.pop('config', False)
+        self.parser = kwargs.pop('parser', None)
+        self.verbose = kwargs.pop('verbose', None)
 
-        config = dict(*args, **kwargs)
-        exclude_files = str.split(config.get('exclude_files'))
+        self.config = dict(*args, **kwargs)
+        self.exclude_files = str.split(self.config.get('exclude_files'))
 
-        args = None if argv else config.get('paths', None)
+        self.args = None if argv else config.get('paths', None)
+
+        self.report = report
 
     def check_paths(self, paths=None):
         if paths is None:
@@ -23,21 +27,21 @@ class Options:
             for a in paths:
                 if os.path.isdir(path):
                     self.#
-
+'''
     def run_analysis(self, filename, lines=None, expected=None, line_offset=0):
         if self.verbose:
             print(f'checking {filename}')
-            #
+            '''
 
     def find_files(self, dirname):
-        dirname = dirname.rstrip('/')
-
-        if not self.check_exclusion(dir):
+        if not self.check_exclusion(dirname.rstrip('/')):
             return
 
         for dirpath, dirnames, filenames in os.walk(dirname):
             if self.verbose:
                 print('directory ' + dirpath)
+
+            self.report.counts['directories'] += 1
 
             for a in sorted(dirnames):
                 if self.check_exclusion(a, dirpath):
@@ -46,7 +50,7 @@ class Options:
             for a in sorted(filenames):
                 if any(fnmatch(a, self.exclude_files)) and
                 not self.check_exclusion(a, dirpath):
-                    self.#
+                    #
 
     def check_exclusion(self, filename, parent=None):
         if not self.config.exclude:
