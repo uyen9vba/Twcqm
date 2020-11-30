@@ -8,7 +8,7 @@ import report
 class Options:
     def __init__(self, report=report.Report(), *args, **kwargs):
         self.argv = kwargs.pop('argv', False)
-        self.config = kwargs.pop('config', False)
+        self.config = kwargs.pop('config', False)'''
         self.parser = kwargs.pop('parser', None)
         self.verbose = kwargs.pop('verbose', None)
 
@@ -17,8 +17,8 @@ class Options:
 
         self.args = None if argv else config.get('paths', None)
 
-        self.report = report
-
+        self.report = report'''
+'''
     def check_paths(self, paths=None):
         if paths is None:
             paths = self.config.get('paths', None)
@@ -26,13 +26,13 @@ class Options:
         try:
             for a in paths:
                 if os.path.isdir(path):
-                    self.#
+                    self.'''
 '''
     def run_analysis(self, filename, lines=None, expected=None, line_offset=0):
         if self.verbose:
             print(f'checking {filename}')
             '''
-
+'''
     def find_files(self, dirname):
         if not self.check_exclusion(dirname.rstrip('/')):
             return
@@ -50,7 +50,7 @@ class Options:
             for a in sorted(filenames):
                 if any(fnmatch(a, self.exclude_files)) and
                 not self.check_exclusion(a, dirpath):
-                    #
+                    #'''
 
     def check_exclusion(self, filename, parent=None):
         if not self.config.exclude:

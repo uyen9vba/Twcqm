@@ -7,8 +7,7 @@ import options
 
 
 class Analyzer:
-    def __init__(self, lines, options=options.Options(), **kwargs):
-        self.options = options
+    def __init__(self, lines, **kwargs):
         self.indent_char = None
         self.line = None
         self.lines = lines
@@ -16,7 +15,64 @@ class Analyzer:
         self.physical_analyses = []
         self.logical_analyses = []
         self.report = report.Report()
+        
+        self.argv = kwargs.pop('argv', False)
+        self.config = kwargs.pop('config', False)
+        self.parser = kwargs.pop('parser', None)
+        self.verbose = kwargs.pop('verbose', None)
 
+        self.config = dict(*args, **kwargs)
+        self.exclude_files = str.split(self.config.get('exclude_files'))
+
+        self.args = None if argv else config.get('paths', None)
+
+    def find_files(self, dirname):
+        if not self.check_exclusion(dirname.rstrip('/')):
+            return
+
+        for dirpath, dirnames, filenames in os.walk(dirname):
+            if self.verbose:
+                print('directory ' + dirpath)
+
+            self.report.counts['directories'] += 1
+
+            for a in sorted(dirnames):
+                if self.check_exclusion(a, dirpath):
+                    dirnames.remove(a)
+
+            for a in sorted(filenames):
+                if any(fnmatch(a, self.exclude_files)) and
+                not self.check_exclusion(a, dirpath):
+                    #
+
+ 
+    def check_paths(self, paths=None):
+        if paths is None:
+            paths = self.config.get('paths', None)
+
+        try:
+            for a in paths:
+                if os.path.isdir(path):
+                    self.#
+
+    def find_files(self, dirname):
+        if not self.check_exclusion(dirname.rstrip('/')):
+            return
+
+        for dirpath, dirnames, filenames in os.walk(dirname):
+            if self.verbose:
+                print('directory ' + dirpath)
+
+            self.report.counts['directories'] += 1
+
+            for a in sorted(dirnames):
+                if self.check_exclusion(a, dirpath):
+                    dirnames.remove(a)
+
+            for a in sorted(filenames):
+                if any(fnmatch(a, self.exclude_files)) and
+                not self.check_exclusion(a, dirpath):
+                    #
 
     def add_physical_analysis(column, message=None):
         self.pysical_analyses.append([column, message])
@@ -73,6 +129,9 @@ class Analyzer:
         return analysis(*arguments)
 
     def run_analyses(self, filename):
+        if self.verbose:
+            print(f'checking {filename}')
+
         tokens = []
 
         for a in self.generate_tokens():
