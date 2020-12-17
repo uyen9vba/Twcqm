@@ -2,8 +2,9 @@
 import argparse
 
 
-def parse_args():
+def parse_args(config):
     argument_parser = argparse.ArgumentParser()
+    config = config['settings']
 
     argument_parser.add_argument(
         '-v',
@@ -35,7 +36,7 @@ def parse_args():
     argument_parser.add_argument(
         '--exclude',
         metavar='patterns',
-        default=DEFAULT_EXCLUDE,
+        default=config.get('exclude_files'),
         help='exclude files of directories which match these comma separated patterns (default: %default)'
     )
     argument_parser.add_argument(
@@ -54,7 +55,7 @@ def parse_args():
         '--ignore',
         metavar='errors',
         default='',
-        help='skip errors and warnings (e.g. E4,W) (default: %s)' %DEFAULT_IGNORE
+        help='skip errors and warnings (e.g. E4,W) (default: %s)' %config.get('ignore')
     )
     argument_parser.add_argument(
         '--show-source',
@@ -95,7 +96,3 @@ def parse_args():
     args = argument_parser.parse_args()
 
     return args
-
-
-def run_analyses(filename):
-    

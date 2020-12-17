@@ -3,76 +3,43 @@ import tokenize
 
 import static.language
 import report
-import options
 
 
 class Analyzer:
-    def __init__(self, lines, **kwargs):
-        self.indent_char = None
-        self.line = None
+    def __init__(self, filename=None, lines=None):
+        self.filename = filename
         self.lines = lines
+        self.indent_char = None
+        self.line_number = 0
         self.line_count = 0
         self.physical_analyses = []
         self.logical_analyses = []
         self.report = report.Report()
         
         self.argv = kwargs.pop('argv', False)
-        self.config = kwargs.pop('config', False)
-        self.parser = kwargs.pop('parser', None)
         self.verbose = kwargs.pop('verbose', None)
 
         self.config = dict(*args, **kwargs)
-        self.exclude_files = str.split(self.config.get('exclude_files'))
+        self.args = None if self.argv else config.get('paths', None)
 
-        self.args = None if argv else config.get('paths', None)
-
-    def find_files(self, dirname):
-        if not self.check_exclusion(dirname.rstrip('/')):
-            return
-
-        for dirpath, dirnames, filenames in os.walk(dirname):
-            if self.verbose:
-                print('directory ' + dirpath)
-
-            self.report.counts['directories'] += 1
-
-            for a in sorted(dirnames):
-                if self.check_exclusion(a, dirpath):
-                    dirnames.remove(a)
-
-            for a in sorted(filenames):
-                if any(fnmatch(a, self.exclude_files)) and
-                not self.check_exclusion(a, dirpath):
-                    #
-
- 
-    def check_paths(self, paths=None):
+    def run_analyses(self, paths=None):
         if paths is None:
             paths = self.config.get('paths', None)
+
+        self.report.start_timer()
 
         try:
             for a in paths:
                 if os.path.isdir(path):
-                    self.#
+                    self.run_analyses_on_directory(a)
+                elif not self.check_exclusion(a):
+                    self.run_analyses_on_file(a)
+        except KeyboardInterrupt:
+            print('stopped analyses')
 
-    def find_files(self, dirname):
-        if not self.check_exclusion(dirname.rstrip('/')):
-            return
+        self.report.stop_timer()
 
-        for dirpath, dirnames, filenames in os.walk(dirname):
-            if self.verbose:
-                print('directory ' + dirpath)
-
-            self.report.counts['directories'] += 1
-
-            for a in sorted(dirnames):
-                if self.check_exclusion(a, dirpath):
-                    dirnames.remove(a)
-
-            for a in sorted(filenames):
-                if any(fnmatch(a, self.exclude_files)) and
-                not self.check_exclusion(a, dirpath):
-                    #
+        return report
 
     def add_physical_analysis(column, message=None):
         self.pysical_analyses.append([column, message])
@@ -81,33 +48,27 @@ class Analyzer:
         self.logical_analyses.append([column, message])
 
     def read_line(self):
-        if self.line >= len(self.lines):
+        if self.line_number >= len(self.lines):
             return ''
 
-        line = self.lines[self.line]
-        self.line += 1
+        line = self.lines[self.line_number]
+        self.line_number += 1
 
         if self.indent_char is None and line[:1] in language.WHITESPACE:
             self.indent_char = line[0]
 
         return line
 
-    def read_lines(file):
-        if sys.version_info < (3,):
-            try:
-                with open(file, 'rU') as a:
-                    return a.readlines()
-        else:
-            try:
-                with open(file, 'rb') as a:
-                    (encoding, lines) = tokenize.detect_encoding(a.readline)
-                    a = io.TextIOWrapper(a, encoding, line_buffering=True)
+    def read_lines(filename):
+        try:
+            with open(filename, 'rb') as a:
+                (encoding, lines) = tokenize.detect_encoding(a.readline)
+                a = io.TextIOWrapper(a, encoding, line_buffering=True)
 
-                    return [line.decode(encoding) for line in lines] + a.readlines()
-
-            except (LookupError, SyntaxError, UnicodeError):
-                with open(file, encoding='latin-1') as a:
-                    return a.readlines()
+                return [line.decode(encoding) for line in lines] + a.readlines()
+        except (LookupError, SyntaxError, UnicodeError):
+            with open(file, encoding='latin-1') as a:
+                return a.readlines()
 
     def run_physical_analyses(self, line):
         for name, analysis, args in self.physical_analyses:
@@ -119,6 +80,23 @@ class Analyzer:
                 if message[:4] == 'E101':
                     self.indent_char = line[0]
 
+    def run_analyses_on_directory(self, dirname):
+        if not self.check_exclusion(dirname.rstrip('/')):
+            return
+
+        for dirpath, dirnames, filenames in os.walk(dirname):
+            if self.verbose:
+                print('directory ' + dirpath)
+
+            self.report.counts['directories'] += 1
+
+            for a in sorted(dirnames):
+                if self.check_exclusion(a, dirpath):
+                    dirnames.remove(a)
+
+            for a in sorted(filenames):
+                if any(fnmatch(a, self.exclude_files)) and not self.check_exclusion(a, dirpath):
+                    self.run_analyses_on_file(os.path.join(dirpath, a))
 
     def run_analysis(self, analysis, args_names):
         args = []
@@ -128,7 +106,7 @@ class Analyzer:
 
         return analysis(*arguments)
 
-    def run_analyses(self, filename):
+    def run_analyses_on_file(self, filename):
         if self.verbose:
             print(f'checking {filename}')
 
@@ -141,9 +119,9 @@ class Analyzer:
 
             if self.options.verbose >= 3:
                 if a[2][0] == a[3][0]:
-                    pos = f'[{a[2][1] or ''}:{a[3][1]}]'
+                    pos = f'[{a[2][1]}:{a[3][1]}]'
                 else:
-                    pos = f'l.{a[3][0]'
+                    pos = f'l.{a[3][0]}'
                 
                 print(f'l.{a[2][0]}' + '\t' + pos +  '\t' + tokenize.tok_name[a[0]] + '\t' + text)
             
@@ -195,7 +173,7 @@ class Analyzer:
                 if previous_row != row:
                    previous_text = self.lines[previous_row - 1][previous_column - 1]
 
-                   if previous text == ',' or (previous_text not in '{[(' and text not in '}])'):
+                   if previous_text == ',' or (previous_text not in '{[(' and text not in '}])'):
                        text = ' ' + text
                 elif previous_column != column:
                     text = line[previous_column:column] + text
@@ -218,3 +196,17 @@ class Analyzer:
                 yield a
         except (SyntaxError, tokenize.TokenError):
             report.Report.add_report('E902')
+
+    def check_exclusion(self, filename, parent=None):
+        if not self.config.exclude:
+            return False
+
+        if any(fnmatch(os.path.basename(filename), a) for a in self.exclude_files):
+            return True
+
+        if parent:
+            filename = os.path.join(parent, filename)
+
+        filename = os.path.abspath(filename)
+
+        return any(fnmatch(filename, self.exclude_files))
