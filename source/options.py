@@ -51,7 +51,7 @@ class Options:
                 if any(fnmatch(a, self.exclude_files)) and
                 not self.check_exclusion(a, dirpath):
                     #'''
-
+'''
     def check_exclusion(self, filename, parent=None):
         if not self.config.exclude:
             return False
@@ -64,4 +64,4 @@ class Options:
 
         filename = os.path.abspath(filename)
 
-        return any(fnmatch(filename, self.exclude_files))
+        return any(fnmatch(filename, self.exclude_files))'''

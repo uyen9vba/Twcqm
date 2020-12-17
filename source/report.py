@@ -1,10 +1,11 @@
 
-from static.language import Language
+import time
+
 
 class Report:
-    def __init__(self, options):
+    def __init__(self):
         self.path = ''
-        self.elapsed = 0
+        self.analyses_time = 0
         self.file_errors = 0
         self.total_errors = 0
         self.total_files = 0
@@ -12,7 +13,6 @@ class Report:
         self.plain_messages = {}
         self.print_messages = []
         self.counts = {'directories': 0, 'files': 0, 'logical lines': 0, 'physical lines': 0}
-        self.report_format = f'{path}:{row}:{column}: {code} {message}'
 
     def add_error(self, row, column, message, analysis):
         code = message[:4]
@@ -34,6 +34,12 @@ class Report:
         path = self.path
 
         for row, column, code, message in self.print_messages:
-            print(self.report_format)
+            print(f'{path}:{row}:{column}: {code} {message}')
 
         return self.file_errors
+
+    def start_timer(self):
+        self.start_time = time.time()
+
+    def stop_timer(self):
+        self.analyses_time = time.time() - self.start_time
